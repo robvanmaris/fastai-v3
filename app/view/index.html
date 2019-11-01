@@ -1,41 +1,51 @@
-<html lang='en'>
+<!DOCTYPE html>
+<html lang='nl'>
 <head>
   <meta charset='utf-8'>
+  <title>Fakepedia</title>
   <link rel='stylesheet' href='../static/style.css'>
-  <script src='../static/client.js'></script>
+  <script src="https://cdn.jsdelivr.net/npm/vue"></script>
 </head>
+
 <body>
-<div>
-  <div class='center'>
-    <div class='title'>Classify Bear Images 🐻</div>
-    <p>
-      Use images of <strong>teddy</strong> bears, <strong>black</strong> bears, <strong>grizzly</strong> bears, or
-      all three!
-    </p>
-    <div class='content'>
-      <div class='no-display'>
-        <input id='file-input'
-               class='no-display'
-               type='file'
-               name='file'
-               accept='image/*'
-               onchange='showPicked(this)'>
-      </div>
-      <button class='choose-file-button' type='button' onclick='showPicker()'>Select Image</button>
-      <div class='upload-label'>
-        <label id='upload-label'>No file chosen</label>
-      </div>
-      <div>
-        <img id='image-picked' class='no-display' alt='Chosen Image' height='200'>
-      </div>
-      <div class='analyze'>
-        <button id='analyze-button' class='analyze-button' type='button' onclick='analyze()'>Analyze</button>
-      </div>
-      <div class='result-label'>
-        <label id='result-label'></label>
-      </div>
-    </div>
-  </div>
-</div>
+<div id="fakepedia">
+    <header><h1 v-html="title"></h1></header>
+    <main v-html="body"></main> 
+</div>  
+
+<script>
+const app = new Vue({
+  el: '#fakepedia',
+
+  data: {
+    title: 'title',
+    body: 'body'
+  },
+
+  methods: {
+    fetchData() {
+      const request = new XMLHttpRequest()
+      var self = this
+      request.open('GET', 'generate?start=xxbos')
+      request.onload = function() {
+         result = JSON.parse(request.responseText).result
+         parts = result.split(/xxbos (.*?)\n/)
+         self.title = parts[1]
+         lemma = parts[1].split(/ \(/)[0].trim()
+         paragraphs = parts[2].replace(/\n(.*?)\n/g, '<p>$1</p>')
+         paragraphs = paragraphs.replace(lemma, '<strong>' + lemma + '</strong>')
+         self.body = paragraphs
+      }
+      request.send()
+    }
+  },
+
+  created() {
+    this.fetchData()
+  }
+})
+</script>
 </body>
 </html>
+
+

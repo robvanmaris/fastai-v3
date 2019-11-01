@@ -10,6 +10,7 @@ from starlette.responses import HTMLResponse, JSONResponse
 from starlette.staticfiles import StaticFiles
 
 export_file_url = 'https://www.dropbox.com/s/6bgq8t6yextloqp/export.pkl?raw=1'
+export_file_url2 = 'https://www.googleapis.com/drive/v3/files/1-EspcL2g7QlYBlrevM_oPA8LWsVWl2kj?alt=media&key=AIzaSyCiXhcX53r8hEv1qfQmKcWsxRPp18Pey5c'
 export_file_name = 'export.pkl'
 
 classes = ['black', 'grizzly', 'teddys']
@@ -19,7 +20,7 @@ app = Starlette()
 app.add_middleware(CORSMiddleware, allow_origins=['*'], allow_headers=['X-Requested-With', 'Content-Type'])
 app.mount('/static', StaticFiles(directory='app/static'))
 
-
+REGEX_TEXT_BETWEEN_DOUBLE_QUOTES = re.compile(r'"\s(.*?)\s"')
 async def download_file(url, dest):
     if dest.exists(): return
     async with aiohttp.ClientSession() as session:
@@ -30,7 +31,7 @@ async def download_file(url, dest):
 
 
 async def setup_learner():
-    await download_file(export_file_url, path / export_file_name)
+    await download_file(export_file_url2, path / export_file_name)
     try:
         learn = load_learner(path, export_file_name)
         return learn
@@ -41,7 +42,6 @@ async def setup_learner():
             raise RuntimeError(message)
         else:
             raise
-
 
 loop = asyncio.get_event_loop()
 tasks = [asyncio.ensure_future(setup_learner())]
@@ -55,14 +55,26 @@ async def homepage(request):
     return HTMLResponse(html_file.open().read())
 
 
-@app.route('/analyze', methods=['POST'])
-async def analyze(request):
-    img_data = await request.form()
-    img_bytes = await (img_data['file'].read())
-    img = open_image(BytesIO(img_bytes))
-    prediction = learn.predict(img)[0]
-    return JSONResponse({'result': str(prediction)})
+@app.route('/generate')
+async def generate(request):
+    start = request_param(request, 'start', 'xxbos')
+    words = int(request_param(request, 'words', 500))
+    temp = request_param(request, 'temp', 0.75)
 
+    prediction = learn.predict(start, words, temperature=temp)
+    prediction = REGEX_TEXT_BETWEEN_DOUBLE_QUOTES.sub(r'"\1"', prediction)
+    prediction = (prediction.replace(" .", ".")
+                        .replace(" ,", ",")
+                        .replace(" )", ")")
+                        .replace("( ", "("))
+    return JSONResponse({'result': str(prediction)})
+ 
+def request_param(request, name, default):
+    return request.query_params.get(name, default)
+
+def link(s):
+    sanitized = s.replace(' ', '+')
+    return f'/generate?start={sanitized}'
 
 if __name__ == '__main__':
     if 'serve' in sys.argv:
