@@ -9,8 +9,12 @@
 
 <body>
 <div id="fakepedia">
-    <header><h1 v-html="title"></h1></header>
+    <header>
+      <h1 v-html="title"></h1></header>
     <main v-html="body"></main> 
+    <hr>
+    <input v-model="lemma">
+    <button v-on:click="generate">Go</button>
 </div>  
 
 <script>
@@ -19,14 +23,15 @@ const app = new Vue({
 
   data: {
     title: 'title',
-    body: 'body'
+    body: 'body',
+    lemma: ''
   },
 
   methods: {
-    fetchData() {
+    fetchData(lemma = 'xxbos') {
       const request = new XMLHttpRequest()
       var self = this
-      request.open('GET', 'generate?start=xxbos')
+      request.open('GET', 'generate?start=' + lemma)
       request.onload = function() {
          result = JSON.parse(request.responseText).result
          parts = result.split(/xxbos (.*?)\n/)
@@ -37,6 +42,10 @@ const app = new Vue({
          self.body = paragraphs
       }
       request.send()
+    },
+
+    generate() {
+      this.fetchData('xxbos ' + this.lemma + '%0A%0A' + this.lemma)
     }
   },
 
