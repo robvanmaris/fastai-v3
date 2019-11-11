@@ -11,9 +11,9 @@
 <div id="fakepedia">
     <header>
       <h1 v-html="title"></h1></header>
-    <main v-html="body"></main> 
+    <main v-html="body"></main>
     <hr>
-    <input v-model="lemma">
+    <input v-model="lemma" v-on:change="generate">
     <button v-on:click="generate">Go</button>
 </div>  
 
@@ -22,8 +22,8 @@ const app = new Vue({
   el: '#fakepedia',
 
   data: {
-    title: 'title',
-    body: 'body',
+    title: 'Wikipedia',
+    body: '<p><strong>Wikipedia</strong> is een onderdeel van de Nederlandse website Wikipedia. Het is eigendom van een aantal Britse universiteiten, waaronder ook de Universiteit van Oxford en de Universiteit van North Carolina. Het is een van de bekendste interessante juridische en wetenschappelijke websites en is in Nederland de grootste bibliotheek. In Nederland is de bibliotheek sinds 2015 gevestigd in Utrecht. De website is twee keer per jaar toegankelijk. </p><p>  In Nederland zijn alleen de Nederlandse Wikipedia en de Nederlandse Wikipedia beschikbaar. Voor Wikipedia is het een editie van de Wikipedia, maar de officiële website is al in de jaren 70 van de vorige eeuw in gebruik. De Wikipedia - versie van de Wikipedia wordt uitgegeven door Wikipedia. De Wikipedia is een digitale uitgave van Wikipedia. </p><p>  In 2010 werd de eerste Wikipedia - versie uitgebracht, die in april 2011 in Nederland werd uitgebracht. Deze versie werd ondergebracht in het Nederlandse Wikipedia - magazine. Op 10 augustus 2012 verscheen de eerste versie van de Wikipedia. De Nederlandstalige versie is niet meer beschikbaar. Op 30 januari 2011 kondigde Wikipedia aan dat het project tijdelijk de standaard is geworden, maar daar wil de Wikipedia ook niets van weten. </p>',
     lemma: ''
   },
 

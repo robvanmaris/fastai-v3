@@ -2,11 +2,11 @@ import aiohttp
 import asyncio
 import uvicorn
 from fastai import *
-from fastai.vision import *
+from fastai.text import *
 from io import BytesIO
 from starlette.applications import Starlette
 from starlette.middleware.cors import CORSMiddleware
-from starlette.responses import HTMLResponse, JSONResponse
+from starlette.responses import HTMLResponse, JSONResponse, StreamingResponse
 from starlette.staticfiles import StaticFiles
 
 export_file_url = 'https://www.dropbox.com/s/6bgq8t6yextloqp/export.pkl?raw=1'
@@ -75,6 +75,38 @@ def request_param(request, name, default):
 def link(s):
     sanitized = s.replace(' ', '+')
     return f'/generate?start={sanitized}'
+
+async def predict(learner, text:str, n_words:int=1, no_unk:bool=True, temperature:float=1., min_p:float=None, sep:str= ' ',
+            decoder=decode_spec_tokens):
+    "Return the `n_words` that come after `text` as a stream of words separated by linebreaks"
+    learner.model.reset()
+    xb,yb = learner.data.one_item(text)
+    new_idx = []
+    for i in range(n_words):
+        res = learner.pred_batch(batch=(xb, yb))[0][-1]
+        if no_unk: res[learner.data.vocab.stoi[UNK]] = 0.
+        if min_p is not None:
+            if (res >= min_p).float().sum() == 0:
+                warn(f"There is no item with probability >= {min_p}, try a lower value.")
+            else: res[res < min_p] = 0.
+        if temperature != 1.: res.pow_(1 / temperature)
+        idx = torch.multinomial(res, 1).item()
+        new_idx.append(idx)
+        xb = xb.new_tensor([idx])[None]
+        next_word = learner.data.vocab.textify([idx], sep=None)[0]
+        if not next_word in [TK_MAJ, TK_UP, TK_REP, TK_WREP]:
+            yield decoder(learner.data.vocab.textify(new_idx, sep=None))[0] + '\n'
+            new_idx = []
+            await asyncio.sleep(0)
+
+@app.route('/test')
+async def test(request):
+    start = request_param(request, 'start', 'xxbos')
+    words = int(request_param(request, 'words', 500))
+    temp = request_param(request, 'temp', 0.75)
+
+    prediction = predict(learn, start, words, temperature=temp)
+    return StreamingResponse(prediction, media_type='text/plain')
 
 if __name__ == '__main__':
     if 'serve' in sys.argv:
