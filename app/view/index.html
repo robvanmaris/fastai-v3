@@ -15,7 +15,7 @@
     <hr>
     <input v-model="lemma" v-on:change="generate">
     <button v-on:click="generate">Go</button>
-</div>  
+</div>
 
 <script>
 const app = new Vue({
@@ -31,15 +31,26 @@ const app = new Vue({
     fetchData(lemma = 'xxbos') {
       const request = new XMLHttpRequest()
       var self = this
-      request.open('GET', 'generate?start=' + lemma)
-      request.onload = function() {
-         result = JSON.parse(request.responseText).result
-         parts = result.split(/xxbos (.*?)\n/)
+      request.open('GET', 'test?start=' + lemma)
+      request.onprogress = function() {
+         result = request.responseText.replace(/\n/g, ' ')
+            .replace(/ \./g, '.')
+            .replace(/ ,/g, ',')
+            .replace(/\( /g, '(')
+            .replace(/ \)/g, ')')
+            .replace(/"\s(.*?)\s"/, '"$1"')
+         parts = result.split(/(.*?)<br><br>/)
          self.title = parts[1]
-         lemma = parts[1].split(/ \(/)[0].trim()
-         paragraphs = parts[2].replace(/\n(.*?)\n/g, '<p>$1</p>')
-         paragraphs = paragraphs.replace(lemma, '<strong>' + lemma + '</strong>')
-         self.body = paragraphs
+         lemma = self.title.split(/ \(/)[0].trim()
+         self.body = ''
+         for (part of parts.slice(3)) {
+
+            if (part === parts[3]) {
+              part = part.replace(lemma, '<strong>' + lemma + '</strong>')
+            }
+            part = part.replace(/(.*?)/, '<p>$1</p>')
+            self.body += part
+         }
       }
       request.send()
     },

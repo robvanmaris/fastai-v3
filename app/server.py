@@ -82,6 +82,7 @@ async def predict(learner, text:str, n_words:int=1, no_unk:bool=True, temperatur
     learner.model.reset()
     xb,yb = learner.data.one_item(text)
     new_idx = []
+    yield text.replace("xxbos", "").replace("\n\n", "<br><br>") + "\n"
     for i in range(n_words):
         res = learner.pred_batch(batch=(xb, yb))[0][-1]
         if no_unk: res[learner.data.vocab.stoi[UNK]] = 0.
@@ -95,7 +96,10 @@ async def predict(learner, text:str, n_words:int=1, no_unk:bool=True, temperatur
         xb = xb.new_tensor([idx])[None]
         next_word = learner.data.vocab.textify([idx], sep=None)[0]
         if not next_word in [TK_MAJ, TK_UP, TK_REP, TK_WREP]:
-            yield decoder(learner.data.vocab.textify(new_idx, sep=None))[0] + '\n'
+            if next_word == '\n \n ':
+                yield '<br><br>\n'
+            else:
+                yield decoder(learner.data.vocab.textify(new_idx, sep=None))[0] + '\n'
             new_idx = []
             await asyncio.sleep(0)
 
