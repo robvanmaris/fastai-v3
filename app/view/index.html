@@ -38,7 +38,7 @@ const app = new Vue({
             .replace(/ ,/g, ',')
             .replace(/\( /g, '(')
             .replace(/ \)/g, ')')
-            .replace(/"\s(.*?)\s"/, '"$1"')
+            .replace(/"\s(.*?)\s"/g, '"$1"')
          parts = result.split(/(.*?)<br><br>/)
          self.title = parts[1]
          lemma = self.title.split(/ \(/)[0].trim()
