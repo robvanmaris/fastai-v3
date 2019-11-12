@@ -14,3 +14,15 @@ main {
     font-size: 14px;
     line-height: 22px;
 }
+
+#searchInput {
+    border: 1px solid #a2a9b1;
+    box-sizing: border-box;
+    display: block;
+    float: right;
+    height: 28px;
+    width: 182px;
+    font-family: system-ui;
+    font-size: 0.8125em;
+    padding: 0.4em 1.84615385em 0.4em 0.4em;
+}}

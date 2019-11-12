@@ -1,20 +1,20 @@
 <!DOCTYPE html>
 <html lang='nl'>
 <head>
-  <meta charset='utf-8'>
-  <title>Fakepedia</title>
-  <link rel='stylesheet' href='../static/style.css'>
-  <script src="https://cdn.jsdelivr.net/npm/vue"></script>
+    <meta charset='utf-8'>
+    <title>Fakepedia</title>
+    <link rel='stylesheet' href='../static/style.css'>
+    <script src="https://cdn.jsdelivr.net/npm/vue"></script>
 </head>
 
 <body>
 <div id="fakepedia">
     <header>
-      <h1 v-html="title"></h1></header>
+        <input id="searchInput" v-model="lemma" v-on:change="generate" placeholder="Doorzoek Fakepedia">
+        <h1 v-html="title"></h1>
+    </header>
     <main v-html="body"></main>
     <hr>
-    <input v-model="lemma" v-on:change="generate">
-    <button v-on:click="generate">Go</button>
 </div>
 
 <script>
@@ -30,20 +30,22 @@ const app = new Vue({
   methods: {
     fetchData(lemma = 'xxbos') {
       const request = new XMLHttpRequest()
-      var self = this
+      let self = this
       request.open('GET', 'test?start=' + lemma)
       request.onprogress = function() {
-         result = request.responseText.replace(/\n/g, ' ')
+         let result = request.responseText.replace(/\n/g, ' ')
             .replace(/ \./g, '.')
             .replace(/ ,/g, ',')
             .replace(/\( /g, '(')
             .replace(/ \)/g, ')')
             .replace(/"\s(.*?)\s"/g, '"$1"')
-         parts = result.split(/(.*?)<br><br>/)
-         self.title = parts[1]
-         lemma = self.title.split(/ \(/)[0].trim()
+         let parts = result.split(/(.*?)<br><br>/)
+         let title = parts[1].trim()
+         if (!title) title = '&nbsp;'
+         self.title = title
+         let lemma = self.title.split(/ \(/)[0].trim()
          self.body = ''
-         for (part of parts.slice(3)) {
+         for (let part of parts.slice(3)) {
 
             if (part === parts[3]) {
               part = part.replace(lemma, '<strong>' + lemma + '</strong>')
@@ -64,6 +66,9 @@ const app = new Vue({
     this.fetchData()
   }
 })
+
+
+
 </script>
 </body>
 </html>
