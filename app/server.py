@@ -76,14 +76,16 @@ def link(s):
     sanitized = s.replace(' ', '+')
     return f'/generate?start={sanitized}'
 
-async def predict(learner, text:str, n_words:int=1, no_unk:bool=True, temperature:float=1., min_p:float=None, sep:str= ' ',
-            decoder=decode_spec_tokens):
+async def predict(learner, text:str, n_paragraphs, no_unk:bool=True, temperature:float=1., min_p:float=None,
+                  decoder=decode_spec_tokens):
     "Return the `n_words` that come after `text` as a stream of words separated by linebreaks"
     learner.model.reset()
     xb,yb = learner.data.one_item(text)
     new_idx = []
     yield text.replace("xxbos", "").replace("\n\n", "<br><br>") + "\n"
-    for i in range(n_words):
+
+    current_paragraph = 0
+    while current_paragraph < n_paragraphs:
         res = learner.pred_batch(batch=(xb, yb))[0][-1]
         if no_unk: res[learner.data.vocab.stoi[UNK]] = 0.
         if min_p is not None:
@@ -95,8 +97,15 @@ async def predict(learner, text:str, n_words:int=1, no_unk:bool=True, temperatur
         new_idx.append(idx)
         xb = xb.new_tensor([idx])[None]
         next_word = learner.data.vocab.textify([idx], sep=None)[0]
+
+        # Handle start of next lemma:
+        if next_word == BOS: return
+
+        # Handle next word, unless it is a synthetic word,
+        # in which case it will be handled together with the word that follows it.
         if not next_word in [TK_MAJ, TK_UP, TK_REP, TK_WREP]:
             if next_word == '\n \n ':
+                current_paragraph += 1
                 yield '<br><br>\n'
             else:
                 yield decoder(learner.data.vocab.textify(new_idx, sep=None))[0] + '\n'
@@ -106,10 +115,10 @@ async def predict(learner, text:str, n_words:int=1, no_unk:bool=True, temperatur
 @app.route('/test')
 async def test(request):
     start = request_param(request, 'start', 'xxbos')
-    words = int(request_param(request, 'words', 500))
+    paragraphs = int(request_param(request, 'pars', 5))
     temp = request_param(request, 'temp', 0.75)
 
-    prediction = predict(learn, start, words, temperature=temp)
+    prediction = predict(learn, start, paragraphs, temperature=temp)
     return StreamingResponse(prediction, media_type='application/stream+json')
 
 if __name__ == '__main__':

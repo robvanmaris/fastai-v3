@@ -19,55 +19,59 @@
 
 <script>
 const app = new Vue({
-  el: '#fakepedia',
+    el: '#fakepedia',
 
-  data: {
-    title: 'Wikipedia',
-    body: '<p><strong>Wikipedia</strong> is een onderdeel van de Nederlandse website Wikipedia. Het is eigendom van een aantal Britse universiteiten, waaronder ook de Universiteit van Oxford en de Universiteit van North Carolina. Het is een van de bekendste interessante juridische en wetenschappelijke websites en is in Nederland de grootste bibliotheek. In Nederland is de bibliotheek sinds 2015 gevestigd in Utrecht. De website is twee keer per jaar toegankelijk. </p><p>  In Nederland zijn alleen de Nederlandse Wikipedia en de Nederlandse Wikipedia beschikbaar. Voor Wikipedia is het een editie van de Wikipedia, maar de officiële website is al in de jaren 70 van de vorige eeuw in gebruik. De Wikipedia - versie van de Wikipedia wordt uitgegeven door Wikipedia. De Wikipedia is een digitale uitgave van Wikipedia. </p><p>  In 2010 werd de eerste Wikipedia - versie uitgebracht, die in april 2011 in Nederland werd uitgebracht. Deze versie werd ondergebracht in het Nederlandse Wikipedia - magazine. Op 10 augustus 2012 verscheen de eerste versie van de Wikipedia. De Nederlandstalige versie is niet meer beschikbaar. Op 30 januari 2011 kondigde Wikipedia aan dat het project tijdelijk de standaard is geworden, maar daar wil de Wikipedia ook niets van weten. </p>',
-    lemma: ''
-  },
-
-  methods: {
-    fetchData(lemma = 'xxbos') {
-      const request = new XMLHttpRequest()
-      let self = this
-      request.open('GET', 'test?start=' + lemma)
-      request.onprogress = function() {
-         let result = request.responseText.replace(/\n/g, ' ')
-            .replace(/ \./g, '.')
-            .replace(/ ,/g, ',')
-            .replace(/\( /g, '(')
-            .replace(/ \)/g, ')')
-            .replace(/"\s(.*?)\s"/g, '"$1"')
-         let parts = result.split(/(.*?)<br><br>/)
-         let title = parts[1].trim()
-         if (!title) title = '&nbsp;'
-         self.title = title
-         let lemma = self.title.split(/ \(/)[0].trim()
-         self.body = ''
-         for (let part of parts.slice(3)) {
-
-            if (part === parts[3]) {
-              part = part.replace(lemma, '<strong>' + lemma + '</strong>')
-            }
-            part = part.replace(/(.*?)/, '<p>$1</p>')
-            self.body += part
-         }
-      }
-      request.send()
+    data: {
+        title: 'Wikipedia',
+        body: '<p><strong>Wikipedia</strong> is een onderdeel van de Nederlandse website Wikipedia. Het is eigendom van een aantal Britse universiteiten, waaronder ook de Universiteit van Oxford en de Universiteit van North Carolina. Het is een van de bekendste interessante juridische en wetenschappelijke websites en is in Nederland de grootste bibliotheek. In Nederland is de bibliotheek sinds 2015 gevestigd in Utrecht. De website is twee keer per jaar toegankelijk. </p><p>  In Nederland zijn alleen de Nederlandse Wikipedia en de Nederlandse Wikipedia beschikbaar. Voor Wikipedia is het een editie van de Wikipedia, maar de officiële website is al in de jaren 70 van de vorige eeuw in gebruik. De Wikipedia - versie van de Wikipedia wordt uitgegeven door Wikipedia. De Wikipedia is een digitale uitgave van Wikipedia. </p><p>  In 2010 werd de eerste Wikipedia - versie uitgebracht, die in april 2011 in Nederland werd uitgebracht. Deze versie werd ondergebracht in het Nederlandse Wikipedia - magazine. Op 10 augustus 2012 verscheen de eerste versie van de Wikipedia. De Nederlandstalige versie is niet meer beschikbaar. Op 30 januari 2011 kondigde Wikipedia aan dat het project tijdelijk de standaard is geworden, maar daar wil de Wikipedia ook niets van weten. </p>',
+        lemma: ''
     },
 
-    generate() {
-      this.fetchData('xxbos ' + this.lemma + '%0A%0A' + this.lemma)
+    methods: {
+        fetchData(lemma = 'xxbos', pars) {
+            const request = new XMLHttpRequest()
+            let self = this
+            request.open('GET', 'test?start=' + lemma + '&pars=' + pars)
+            request.onprogress = function () {
+                let result = request.responseText
+                    .replace(/\n/g, ' ')
+                    .replace(/ \./g, '.')
+                    .replace(/ ,/g, ',')
+                    .replace(/\( /g, '(')
+                    .replace(/ \)/g, ')')
+                    .replace(/"\s(.*?)\s"/g, '"$1"')
+                let parts = result.split(/(.*?)<br><br>/)
+                let title = parts[1].trim()
+                if (!title) {
+                    title = '&nbsp;'
+                }
+                self.title = title
+                let lemma = self.title.split(/ \(/)[0].trim()
+                self.body = ''
+                for (let part of parts.slice(3)) {
+                    if (part === parts[3]) {
+                        part = part.replace(lemma, '<strong>' + lemma + '</strong>')
+                    }
+                    part = part.replace(/(.*?)/, '<p>$1</p>')
+                    self.body += part
+                }
+            }
+            request.send()
+        },
+
+        generate() {
+            if (this.lemma) {
+                this.fetchData('xxbos ' + this.lemma + '%0A%0A' + this.lemma, 5)
+            } else {
+                this.fetchData('xxbos', 6)
+            }
+        }
+    },
+
+    created() {
+        // Executed after page is loaded.
     }
-  },
-
-  created() {
-    this.fetchData()
-  }
 })
-
-
 
 </script>
 </body>
