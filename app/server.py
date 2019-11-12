@@ -110,7 +110,7 @@ async def test(request):
     temp = request_param(request, 'temp', 0.75)
 
     prediction = predict(learn, start, words, temperature=temp)
-    return StreamingResponse(prediction, media_type='text/plain')
+    return StreamingResponse(prediction, media_type='application/stream+json')
 
 if __name__ == '__main__':
     if 'serve' in sys.argv:
