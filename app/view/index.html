@@ -59,10 +59,10 @@
                     self.title = title
                     let lemma = self.title.split(/ \(/)[0].trim()
                     self.body = ''
-                    self.setStatus('GENERATING')
                     for (let part of parts.slice(3)) {
                         if (part === parts[3]) {
                             part = part.replace(lemma, '<strong>' + lemma + '</strong>')
+                            self.setStatus('GENERATING')
                         }
                         part = part.replace(/(.*?)/, '<p>$1</p>')
                         self.body += part
