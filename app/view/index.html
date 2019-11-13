@@ -44,7 +44,6 @@
                 let self = this
                 request.open('GET', 'test?start=' + lemma + '&pars=' + pars)
                 request.onprogress = function () {
-                    self.setStatus('GENERATING')
                     let result = request.responseText
                         .replace(/\n/g, ' ')
                         .replace(/ \./g, '.')
@@ -60,6 +59,7 @@
                     self.title = title
                     let lemma = self.title.split(/ \(/)[0].trim()
                     self.body = ''
+                    self.setStatus('GENERATING')
                     for (let part of parts.slice(3)) {
                         if (part === parts[3]) {
                             part = part.replace(lemma, '<strong>' + lemma + '</strong>')
@@ -76,6 +76,7 @@
 
             generate() {
                 if (this.lemma) {
+                    this.title = this.lemma
                     this.fetchData('xxbos ' + this.lemma + '%0A%0A' + this.lemma, 5)
                 } else {
                     this.fetchData('xxbos', 6)
