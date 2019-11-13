@@ -12,7 +12,7 @@
 <div id="fakepedia">
     <header>
         <input id="searchInput" v-model="lemma" v-on:change="generate" v-bind:[inputdisabled]="inputdisabled" placeholder="Doorzoek Fakepedia">
-        <h1 v-html="title">Wikipedia</h1>
+        <h1 v-html="title">Fakepedia</h1>
     </header>
     <div class="spinner" v-bind:style="spinnerStyle">
         <div></div>
@@ -29,8 +29,13 @@
         el: '#fakepedia',
 
         data: {
-            title: 'Wikipedia',
-            body: '<p><strong>Wikipedia</strong> is een onderdeel van de Nederlandse website Wikipedia. Het is eigendom van een aantal Britse universiteiten, waaronder ook de Universiteit van Oxford en de Universiteit van North Carolina. Het is een van de bekendste interessante juridische en wetenschappelijke websites en is in Nederland de grootste bibliotheek. In Nederland is de bibliotheek sinds 2015 gevestigd in Utrecht. De website is twee keer per jaar toegankelijk. </p><p>  In Nederland zijn alleen de Nederlandse Wikipedia en de Nederlandse Wikipedia beschikbaar. Voor Wikipedia is het een editie van de Wikipedia, maar de officiële website is al in de jaren 70 van de vorige eeuw in gebruik. De Wikipedia - versie van de Wikipedia wordt uitgegeven door Wikipedia. De Wikipedia is een digitale uitgave van Wikipedia. </p><p>  In 2010 werd de eerste Wikipedia - versie uitgebracht, die in april 2011 in Nederland werd uitgebracht. Deze versie werd ondergebracht in het Nederlandse Wikipedia - magazine. Op 10 augustus 2012 verscheen de eerste versie van de Wikipedia. De Nederlandstalige versie is niet meer beschikbaar. Op 30 januari 2011 kondigde Wikipedia aan dat het project tijdelijk de standaard is geworden, maar daar wil de Wikipedia ook niets van weten. </p>',
+            title: 'Fakepedia',
+            body: '<p>Welkom bij <strong>Fakepedia</strong>, de eerste Nederlandse fake Wikipedia! Gebruik de ' +
+                'zoekfunctie om Fakepedia zelf te raadplegen over een onderwerp naar keuze.</p>' +
+                '<p>Fakepedia is een demonstratie van natural language processing (NLP) op basis van machine learning. ' +
+                'Het gebruikt een recurrent neuraal netwerk (RNN) dat tien keer getraind is op de volledige tekst van de ' +
+                'Nederlandse Wikipedia. Het resultaat is een neuraal netwerk dat teksten kan genereren die opmerkelijk ' +
+                'veel lijken op artikelen in de echte Wikipedia.</p>',
             lemma: '',
             spinnerStyle: {},
             bodyStyle: {},
@@ -81,12 +86,12 @@
                 } else {
                     this.fetchData('xxbos', 6)
                 }
-                this.lemma = ''
+                this.lemma = '';
                 this.setStatus('WAITING')
             },
 
             setStatus(status) {
-                this.inputdisabled = (status === 'FINISHED' ? '' : 'disabled')
+                this.inputdisabled = (status === 'FINISHED' ? '' : 'disabled');
                 this.spinnerStyle = (status === 'WAITING' ? {display: 'inline-block'} : {display: 'none'});
                 this.bodyStyle = (status === 'WAITING' ? {display: 'none'} : {display: 'block'});
                 this.bodyFinishedStyle = (status === 'FINISHED' ? {display: 'block'} : {display: 'none'})
