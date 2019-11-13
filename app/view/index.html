@@ -11,7 +11,7 @@
 <body>
 <div id="fakepedia">
     <header>
-        <input id="searchInput" v-model="lemma" v-on:change="generate" placeholder="Doorzoek Fakepedia">
+        <input id="searchInput" v-model="lemma" v-on:change="generate" v-bind:[inputdisabled]="inputdisabled" placeholder="Doorzoek Fakepedia">
         <h1 v-html="title">Wikipedia</h1>
     </header>
     <div class="spinner" v-bind:style="spinnerStyle">
@@ -34,7 +34,8 @@
             lemma: '',
             spinnerStyle: {},
             bodyStyle: {},
-            bodyFinishedStyle: {}
+            bodyFinishedStyle: {},
+            inputdisabled: ''
         },
 
         methods: {
@@ -80,10 +81,12 @@
                 } else {
                     this.fetchData('xxbos', 6)
                 }
+                this.lemma = ''
                 this.setStatus('WAITING')
             },
 
             setStatus(status) {
+                this.inputdisabled = (status === 'FINISHED' ? '' : 'disabled')
                 this.spinnerStyle = (status === 'WAITING' ? {display: 'inline-block'} : {display: 'none'});
                 this.bodyStyle = (status === 'WAITING' ? {display: 'none'} : {display: 'block'});
                 this.bodyFinishedStyle = (status === 'FINISHED' ? {display: 'block'} : {display: 'none'})
