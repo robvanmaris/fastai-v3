@@ -47,7 +47,7 @@
             fetchData: function (lemma = 'xxbos', pars) {
                 const request = new XMLHttpRequest();
                 let self = this;
-                request.open('GET', 'test?start=' + lemma + '&pars=' + pars);
+                request.open('GET', 'generate?start=' + lemma + '&pars=' + pars);
                 request.onprogress = function () {
                     let result = request.responseText
                         .replace(/\n/g, ' ')

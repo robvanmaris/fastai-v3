@@ -55,20 +55,6 @@ async def homepage(request):
     return HTMLResponse(html_file.open().read())
 
 
-@app.route('/generate')
-async def generate(request):
-    start = request_param(request, 'start', 'xxbos')
-    words = int(request_param(request, 'words', 500))
-    temp = request_param(request, 'temp', 0.75)
-
-    prediction = learn.predict(start, words, temperature=temp)
-    prediction = REGEX_TEXT_BETWEEN_DOUBLE_QUOTES.sub(r'"\1"', prediction)
-    prediction = (prediction.replace(" .", ".")
-                        .replace(" ,", ",")
-                        .replace(" )", ")")
-                        .replace("( ", "("))
-    return JSONResponse({'result': str(prediction)})
- 
 def request_param(request, name, default):
     return request.query_params.get(name, default)
 
@@ -112,7 +98,7 @@ async def predict(learner, text:str, n_paragraphs, no_unk:bool=True, temperature
             new_idx = []
             await asyncio.sleep(0)
 
-@app.route('/test')
+@app.route('/generate')
 async def test(request):
     start = request_param(request, 'start', 'xxbos')
     paragraphs = int(request_param(request, 'pars', 5))
